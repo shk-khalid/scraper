@@ -10,7 +10,6 @@ function App() {
       <Toaster
         position="bottom-left"
         toastOptions={{
-          // base styles for all toasts (this will act as your "info" style)
           style: {
             background: '#DBEAFE',   
             color: '#1E40AF',      

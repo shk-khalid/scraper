@@ -1,6 +1,4 @@
-// src/components/auth/AuthLayout.tsx
 import React, { ReactNode } from 'react';
-import Logo from "../../assets/desktopLogo.png";
 
 interface AuthLayoutProps {
   title: string;
@@ -53,13 +51,8 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         <div className="tw-absolute tw-top-16 tw-left-12 tw-w-40 tw-h-40 tw-bg-white/10 tw-rounded-full tw-blur-3xl tw-transform tw-scale-110 tw-animate-pulse" />
         <div className="tw-absolute tw-bottom-24 tw-right-16 tw-w-56 tw-h-56 tw-bg-white/20 tw-rounded-full tw-blur-2xl" />
 
-        <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-justify-between tw-h-full tw-p-8">
-          <img
-            src={Logo}
-            alt="Protega"
-            className="tw-h-12 sm:tw-h-16 tw-w-auto tw-object-contain"
-            style={{ alignSelf: 'flex-start' }}
-          />
+        <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-justify-end tw-h-full tw-p-8">
+          
           <div className={`tw-self-start tw-text-left tw-text-white tw-max-w-xs ${welcomeMarginBottomClass}`}>
             {lines.length === 2 ? (
               <>
@@ -120,11 +113,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       >
         {noCard ? (
           <div className="tw-w-full sm:tw-max-w-md">
-            {hideLeftOnMobile && (
-              <div className="tw-flex tw-justify-center tw-mb-6 md:tw-hidden">
-                <img src={Logo} alt="Protega" className="tw-h-12 tw-w-auto tw-object-contain" />
-              </div>
-            )}
+            
             <h2 className="tw-text-center tw-text-[#101828] tw-text-2xl sm:tw-text-3xl tw-font-extrabold tw-mb-6">
               {title}
             </h2>
@@ -146,11 +135,6 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
               tw-shadow-lg
             "
           >
-            {hideLeftOnMobile && (
-              <div className="tw-flex tw-justify-center tw-mb-6 md:tw-hidden">
-                <img src={Logo} alt="Protega" className="tw-h-12 tw-w-auto" />
-              </div>
-            )}
             <h2 className="tw-text-center tw-text-[#101828] tw-text-2xl sm:tw-text-3xl tw-font-bold tw-mb-4">
               {title}
             </h2>

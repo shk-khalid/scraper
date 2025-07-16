@@ -3,141 +3,101 @@ import React, {
   useContext,
   useCallback,
   useState,
-  useEffect,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import {
   setUser,
-  setAccessToken,
   logout as logoutAction,
 } from '@/store/slices/authSlice';
 import { RootState } from '@/store';
 import { useIdleTimer } from '@/hooks/useIdleTimer';
 import { useNavigate } from 'react-router-dom';
-import { signIn as apiSignIn, signOut as apiSignOut } from '@/services/authService';
-
-interface AuthUser {
-  id: string;
-  email: string;
-  shopUrl: string;
-  active: boolean;
-  role: string;
-}
+import {
+  signIn as apiSignIn,
+  register as apiRegister,
+  requestPasswordReset,
+  signOut as apiSignOut,
+} from '@/services/authService';
 
 interface AuthContextType {
-  user: AuthUser | null;
+  userEmail: string | null;
   loading: boolean;
-  error: Error | null;
+  error: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: false,
-  error: null,
-  isAuthenticated: false,
-  login: async () => {},
-  logout: async () => {},
-});
-
+const AuthContext = createContext<AuthContextType>({} as any);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, accessToken } = useSelector((state: RootState) => state.auth);
+  const userEmail = useSelector((s: RootState) => s.auth.userEmail);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useIdleTimer();
 
-  // Wait for PersistGate / rehydration
-  useEffect(() => {
-    setHydrated(true);
+  const login = useCallback(async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    const { message, user_email, error: err } = await apiSignIn(email, password);
+    if (err) {
+      setError(message);
+      setLoading(false);
+      throw new Error(message);
+    }
+    dispatch(setUser({ email: user_email }));
+    setLoading(false);
+  }, [dispatch]);
+
+  const registerFn = useCallback(async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    const { message, error: err } = await apiRegister(email, password);
+    setLoading(false);
+    if (err) {
+      setError(message);
+      throw new Error(message);
+    }
+    // no immediate navigation—component handles it
   }, []);
 
-  // Attach token to axios
-  useEffect(() => {
-    if (accessToken) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
+  const forgotPassword = useCallback(async (email: string) => {
+    setLoading(true);
+    setError(null);
+    const { message, error: err } = await requestPasswordReset(email);
+    setLoading(false);
+    if (err) {
+      setError(message);
+      throw new Error(message);
     }
-  }, [accessToken]);
-
-  const login = useCallback(
-    async (email: string, password: string) => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await apiSignIn(email, password);
-        const json = response.data as {
-          success: boolean;
-          token: string;
-          details: {
-            id: string;
-            email: string;
-            shop_url: string;
-            active: boolean;
-          };
-          role: string;
-          message: string;
-        };
-
-        if (!json.success) {
-          throw new Error(json.message || 'Login failed');
-        }
-
-        dispatch(
-          setUser({
-            id: json.details.id,
-            email: json.details.email,
-            shopUrl: json.details.shop_url,
-            active: json.details.active,
-            role: json.role,
-          })
-        );
-        dispatch(setAccessToken(json.token));
-
-        // 💡 No navigate here — let the component handle it
-      } catch (err: any) {
-        console.error('Login error in context:', err);
-        setError(err);
-        throw err; // so caller’s catch block runs
-      } finally {
-        setLoading(false);
-      }
-    },
-    [dispatch]
-  );
+  }, []);
 
   const logout = useCallback(async () => {
     setLoading(true);
-    try {
-      await apiSignOut();
-    } catch (err) {
-      console.error('Sign-out error:', err);
-    } finally {
-      dispatch(logoutAction());
-      navigate('/login', { replace: true });
-      setLoading(false);
-    }
+    await apiSignOut();
+    dispatch(logoutAction());
+    navigate('/login', { replace: true });
+    setLoading(false);
   }, [dispatch, navigate]);
-
-  const isAuthenticated = Boolean(user);
-
-  if (!hydrated) {
-    return <div>Loading authentication…</div>;
-  }
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, error, isAuthenticated, login, logout }}
+      value={{
+        userEmail,
+        loading,
+        error,
+        isAuthenticated: Boolean(userEmail),
+        login,
+        register: registerFn,
+        forgotPassword,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

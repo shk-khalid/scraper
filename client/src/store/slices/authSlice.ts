@@ -2,23 +2,13 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  shopUrl: string;
-  active: boolean;
-  role: string;
-}
-
 interface AuthState {
-  user: AuthUser | null;
-  accessToken: string | null;
+  userEmail: string | null;
   lastActivity: number;
 }
 
 const initialState: AuthState = {
-  user: null,
-  accessToken: null,
+  userEmail: null,
   lastActivity: Date.now(),
 };
 
@@ -26,31 +16,20 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // Now expects the full AuthUser shape
-    setUser: (state, action: PayloadAction<AuthUser>) => {
-      state.user = action.payload;
-      state.lastActivity = Date.now();
-    },
-    setAccessToken: (state, action: PayloadAction<string>) => {
-      state.accessToken = action.payload;
+    setUser: (state, action: PayloadAction<{ email: string }>) => {
+      state.userEmail = action.payload.email;
       state.lastActivity = Date.now();
     },
     updateLastActivity: (state) => {
       state.lastActivity = Date.now();
     },
     logout: (state) => {
-      state.user = null;
-      state.accessToken = null;
+      state.userEmail = null;
       state.lastActivity = 0;
     },
   },
 });
 
-export const {
-  setUser,
-  setAccessToken,
-  updateLastActivity,
-  logout,
-} = authSlice.actions;
+export const { setUser, updateLastActivity, logout } = authSlice.actions;
 
 export default authSlice.reducer;

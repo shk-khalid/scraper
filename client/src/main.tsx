@@ -9,7 +9,6 @@ import { store, persistor } from '@/store';
 import { AuthProvider } from '@/context/AuthContext';
 import App from './App';
 import './index.css';
-import { MerchantProvider } from './context/MerchantContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,9 +16,7 @@ createRoot(document.getElementById('root')!).render(
       <PersistGate loading={<div>Loading persisted state…</div>} persistor={persistor}>
         <Router>
           <AuthProvider>
-            <MerchantProvider>
-              <App />
-            </MerchantProvider>
+            <App />
           </AuthProvider>
         </Router>
       </PersistGate>

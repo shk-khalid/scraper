@@ -1,69 +1,103 @@
 import axiosInstance from './api';
 
-type ApiResp = { success: boolean; message?: string; [key: string]: any };
+// Merge the message field with any extra payload
+export type ApiResp<T = {}> = T & {
+  message: string;
+};
 
 export async function signIn(
   email: string,
   password: string
-): Promise<{ data: ApiResp; error: Error | null }> {
+): Promise<{ message: string; user_email: string; error: Error | null }> {
   try {
-    const endpoint = '/api/auth/loginMerchant';
-    const { data } = await axiosInstance.post<ApiResp>(endpoint, { email, password });
+    const { data, status } = await axiosInstance.post<
+      ApiResp<{ user_email: string }>
+    >(
+      '/api/login/',
+      { email, password },
+      { withCredentials: true }
+    );
 
-    if (!data.success) throw new Error(data.message || 'Login failed');
+    if (status !== 200) {
+      throw new Error(data.message || 'Login failed');
+    }
 
-    return { data, error: null };
-  } catch (error: any) {
-    console.error('Error signing in:', error);
-    return { data: { success: false, message: error.message }, error };
+    return { message: data.message, user_email: data.user_email, error: null };
+  } catch (err: any) {
+    console.error('Error signing in:', err);
+    const msg =
+      err.response?.data?.message ||
+      err.message ||
+      'Unknown login error';
+    return { message: msg, user_email: '', error: err };
+  }
+}
+
+export async function register(
+  email: string,
+  password: string
+): Promise<{ message: string; error: Error | null }> {
+  try {
+    const { data, status } = await axiosInstance.post<
+      ApiResp
+    >(
+      '/api/register/',
+      { email, password },
+      { withCredentials: true }
+    );
+
+    if (![201, 202].includes(status)) {
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    return { message: data.message, error: null };
+  } catch (err: any) {
+    console.error('Error registering:', err);
+    const msg =
+      err.response?.data?.message ||
+      err.message ||
+      'Unknown registration error';
+    return { message: msg, error: err };
+  }
+}
+
+export async function requestPasswordReset(
+  email: string
+): Promise<{ message: string; error: Error | null }> {
+  try {
+    const { data, status } = await axiosInstance.post<
+      ApiResp
+    >(
+      '/api/forgot/',
+      { email },
+      { withCredentials: true }
+    );
+
+    if (status !== 200) {
+      throw new Error(data.message || 'Password reset request failed');
+    }
+
+    return { message: data.message, error: null };
+  } catch (err: any) {
+    console.error('Error requesting password reset:', err);
+    const msg =
+      err.response?.data?.message ||
+      err.message ||
+      'Unknown error';
+    return { message: msg, error: err };
   }
 }
 
 export async function signOut(): Promise<{ error: Error | null }> {
   try {
-    await axiosInstance.get('/api/auth/logout');
+    await axiosInstance.post(
+      '/api/logout/',
+      {},
+      { withCredentials: true }
+    );
     return { error: null };
-  } catch (error: any) {
-    console.error('Error signing out:', error);
-    return { error };
-  }
-}
-
-export async function requestPasswordOTP(
-  email: string
-): Promise<{ data: ApiResp | null; error: Error | null }> {
-  try {
-    const endpoint = '/api/auth/MresetPasswordOTP';
-    const { data } = await axiosInstance.post<ApiResp>(endpoint, { email });
-
-    if (data.success === false) {
-      return { data: null, error: new Error(data.message || 'OTP request failed') };
-    }
-
-    return { data, error: null };
-  } catch (error: any) {
-    console.error('Error requesting password OTP:', error);
-    return { data: null, error: new Error(error.message) };
-  }
-}
-
-export async function resetPassword(
-  email: string,
-  newPassword: string,
-  otp: string
-): Promise<{ data: ApiResp | null; error: Error | null }> {
-  try {
-    const endpoint = '/api/auth/MresetPassword';
-    const payload = { email, newPassword, otp };
-    const { data } = await axiosInstance.post<ApiResp>(endpoint, payload);
-
-    if (data.success === false) {
-      return { data: null, error: new Error(data.message || 'Password reset failed') };
-    }
-
-    return { data, error: null };
-  } catch (error: any) {
-    console.error('Error resetting password:', error);
-    return { data: null, error: new Error(error.message) };
+  } catch (err: any) {
+    console.error('Error signing out:', err);
+    return { error: err };
   }
 }
