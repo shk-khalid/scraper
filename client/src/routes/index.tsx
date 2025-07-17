@@ -1,35 +1,34 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import AuthGuard from "@/components/auth/AuthGuard";
 import PublicRoute from "@/components/auth/PublicRoutes";
 
-// Authentication Page
+// Pages
 import Login from "@/pages/auth/Login";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import Register from "@/pages/auth/Register";
-
+import Dashboard from "@/pages/Dashboard";
+import NotFound from "@/pages/NotFound";
 
 const AppRoutes: React.FC = () => {
     return (
         <AnimatePresence mode="wait">
             <Routes>
-
-
-                {/* <Route path="/" element={<Navigate to="/merchant/contracts" replace />} /> */}
-
-
-
                 {/* Public Routes */}
                 <Route element={<PublicRoute />}>
-                    {/* Authentication Routes */}
                     <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register /> } />
+                    <Route path="/register" element={<Register />} />
                     {/* <Route path="/reset-password" element={<ResetPassword />} /> */}
                 </Route>
 
-                {/* Protected Customer Routes */}
-                
+                {/* Protected Routes */}
+                <Route element={<AuthGuard />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
+
+                {/* Redirect unknown paths to 404 */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </AnimatePresence>
     );
