@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import AuthGuard from "@/components/auth/AuthGuard";
 import PublicRoute from "@/components/auth/PublicRoutes";
@@ -15,6 +15,8 @@ const AppRoutes: React.FC = () => {
     return (
         <AnimatePresence mode="wait">
             <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
                 {/* Public Routes */}
                 <Route element={<PublicRoute />}>
                     <Route path="/login" element={<Login />} />
