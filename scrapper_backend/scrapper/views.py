@@ -112,7 +112,7 @@ def google_auth(request):
     try:
         resp = supabase.auth.sign_in_with_id_token({
             "provider": "google",
-            "token": provider_token
+            "id_token": provider_token
         })
 
         session = getattr(resp, 'session', None) or getattr(getattr(resp, 'data', {}), 'session', None)
