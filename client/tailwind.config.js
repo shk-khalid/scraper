@@ -5,15 +5,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        protega: {
-          500: '#2563EB',
-          600: '#1E3A8A',
-          700: '#1E40AF',
-          800: '#1E3A8A'
-        },
-        cyan: {
-          400: '#22D3EE'
-        }
+        'oxford-blue': '#0B132B',
+        'space-cadet': '#1C2541',
+        'yinmn-blue': '#3A506B',
+        'verdigris': '#5BC0BE',
+        'white': '#FFFFFF',
       },
       animation: {
         'pulse': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, AlertCircle, CheckCircle, Loader2, Globe, Code, Copy, ExternalLink, RefreshCw, BookOpen, Sparkles, LogOut, Database } from 'lucide-react';
-import { scrape } from '../services/scrapeService';
+import { scrape } from '@/services/scrapeService';
 
 interface Alert {
   id: string;
