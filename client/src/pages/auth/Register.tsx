@@ -173,7 +173,7 @@ const Register: React.FC = () => {
         </div>
 
         {/* Google Sign‑up */}
-        <div>
+        <div className="tw-w-full tw-flex tw-justify-center tw-mt-4">
           <GoogleLogin
             onSuccess={async (credentialResponse: CredentialResponse) => {
               try {

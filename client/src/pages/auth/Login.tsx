@@ -154,7 +154,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Google Login */}
-        <div>
+        <div className="tw-w-full tw-flex tw-justify-center tw-mt-4">
           <GoogleLogin
             onSuccess={async (credentialResponse: CredentialResponse) => {
               try {
