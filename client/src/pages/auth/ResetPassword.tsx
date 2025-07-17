@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Mail, Loader, Eye, EyeOff } from 'lucide-react';
-import AuthLayout from '../../components/auth/AuthLayout';
+import AuthLayout from '@/components/auth/AuthLayout';
 import { requestPasswordOTP, resetPassword } from '@/services/authService';
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;

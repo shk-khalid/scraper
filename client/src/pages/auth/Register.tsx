@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Lock, Mail, Loader, Eye, EyeOff } from 'lucide-react';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { useAuth } from '../../context/AuthContext';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import AuthLayout from '@/components/auth/AuthLayout';
+import { useAuth } from '@/context/AuthContext';
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +15,8 @@ const Register: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
+  const redirectTo = '/merchant/contracts';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,7 +140,7 @@ const Register: React.FC = () => {
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Register button */}
         <div className="tw-space-y-2">
           <button
             type="submit"
@@ -162,6 +164,37 @@ const Register: React.FC = () => {
             </Link>
           </p>
         </div>
+
+        {/* Or divider */}
+        <div className="tw-flex tw-items-center tw-justify-center tw-space-x-2">
+          <span className="tw-border-b tw-border-gray-400 tw-w-1/5"></span>
+          <span className="tw-text-xs tw-text-gray-500">or</span>
+          <span className="tw-border-b tw-border-gray-400 tw-w-1/5"></span>
+        </div>
+
+        {/* Google Sign‑up */}
+        <div>
+          <GoogleLogin
+            onSuccess={async (credentialResponse: CredentialResponse) => {
+              try {
+                const idToken = credentialResponse.credential;
+                if (!idToken) throw new Error('No ID token returned from Google');
+                await loginWithGoogle(idToken);
+                toast.success('Signed up & logged in with Google!');
+                navigate(redirectTo, { replace: true });
+              } catch (err: any) {
+                console.error('Google signup error:', err);
+                toast.error(err.message || 'Google signup failed.');
+              }
+            }}
+            onError={() => {
+              toast.error('Google signup was cancelled or failed.');
+            }}
+            useOneTap={false}
+          />
+        </div>
+
+
       </form>
     </AuthLayout>
   );

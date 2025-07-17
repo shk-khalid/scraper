@@ -17,6 +17,7 @@ import {
   register as apiRegister,
   requestPasswordReset,
   signOut as apiSignOut,
+  signInWithGoogle,
 } from '@/services/authService';
 
 interface AuthContextType {
@@ -25,6 +26,7 @@ interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (providerToken: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -54,6 +56,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch(setUser({ email: user_email }));
     setLoading(false);
   }, [dispatch]);
+
+  const loginWithGoogle = useCallback(
+    async (providerToken: string) => {
+      setLoading(true);
+      setError(null);
+      const { message, user_email, error: err } = await signInWithGoogle(providerToken);
+      if (err) {
+        setError(message);
+        setLoading(false);
+        throw new Error(message);
+      }
+      dispatch(setUser({ email: user_email }));
+      setLoading(false);
+    },
+    [dispatch]
+  );
 
   const registerFn = useCallback(async (email: string, password: string) => {
     setLoading(true);
@@ -94,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error,
         isAuthenticated: Boolean(userEmail),
         login,
+        loginWithGoogle,
         register: registerFn,
         forgotPassword,
         logout,

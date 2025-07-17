@@ -12,7 +12,7 @@ export const useIdleTimer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const lastActivity = useSelector((state: RootState) => state.auth.lastActivity);
-  const isAuthenticated = useSelector((state: RootState) => !!state.auth.user);
+  const isAuthenticated = useSelector((state: RootState) => !!state.auth.userEmail);
 
   useEffect(() => {
     if (!isAuthenticated) return;

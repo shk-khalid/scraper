@@ -1,6 +1,5 @@
 import axiosInstance from './api';
 
-// Merge the message field with any extra payload
 export type ApiResp<T = {}> = T & {
   message: string;
 };
@@ -99,5 +98,33 @@ export async function signOut(): Promise<{ error: Error | null }> {
   } catch (err: any) {
     console.error('Error signing out:', err);
     return { error: err };
+  }
+}
+
+
+export async function signInWithGoogle(
+  providerToken: string
+): Promise<{ message: string; user_email: string; error: Error | null }> {
+  try {
+    const { data, status } = await axiosInstance.post<
+      ApiResp<{ user_email: string }>
+    >(
+      '/api/google/',
+      { provider_token: providerToken },
+      { withCredentials: true }
+    );
+
+    if (status !== 200) {
+      throw new Error(data.message || 'Google login failed');
+    }
+
+    return { message: data.message, user_email: data.user_email, error: null };
+  } catch (err: any) {
+    console.error('Error signing in with Google:', err);
+    const msg =
+      err.response?.data?.message ||
+      err.message ||
+      'Unknown Google login error';
+    return { message: msg, user_email: '', error: err };
   }
 }

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Lock, Mail, Loader, Eye, EyeOff } from 'lucide-react';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { useAuth } from '../../context/AuthContext';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import AuthLayout from '@/components/auth/AuthLayout';
+import { useAuth } from '@/context/AuthContext';
 
 interface LocationState {
   from?: { pathname: string };
@@ -17,8 +18,7 @@ const Login: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation() as { state?: LocationState };
-  const { login } = useAuth();
-
+  const { login, loginWithGoogle } = useAuth();
   const redirectTo = location.state?.from?.pathname || '/merchant/contracts';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +27,6 @@ const Login: React.FC = () => {
       toast.error('Both fields are mandatory.');
       return;
     }
-
     setIsLoading(true);
     try {
       await login(email, password);
@@ -41,9 +40,8 @@ const Login: React.FC = () => {
     }
   };
 
-  const togglePasswordVisibility = () => setShowPassword(prev => !prev);
-
-  const welcomeLines = ['Welcome Back!', 'Sign in to continue with Protega'];
+  const togglePasswordVisibility = () => setShowPassword(v => !v);
+  const welcomeLines = ['Welcome Back!', 'Sign in to continue'];
 
   return (
     <AuthLayout
@@ -121,15 +119,15 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        {/* Submit */}
+
+        {/* Standard Submit */}
         <div>
           <button
             type="submit"
             disabled={isLoading}
             className={`
               tw-w-full tw-flex tw-justify-center tw-items-center
-              tw-py-2.5 tw-px-4
-              tw-border tw-border-transparent tw-rounded-md
+              tw-py-2.5 tw-px-4 tw-border tw-border-transparent tw-rounded-md
               tw-font-medium tw-text-white
               tw-bg-slate-900 hover:tw-bg-slate-800
               focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-slate-700
@@ -139,15 +137,45 @@ const Login: React.FC = () => {
           >
             {isLoading ? <Loader className="tw-h-5 tw-w-5 tw-animate-spin" /> : 'Sign in'}
           </button>
-          
-          <p className="tw-text-sm tw-text-gray-600 tw-mt-4">
+
+          <p className="tw-text-center tw-text-sm tw-text-gray-600 tw-mt-4">
             Don't have an account?{' '}
-            <Link to="/register" className="tw-text-cyan-600 hover:tw-underline">
+            <Link to="/register" className="tw-font-medium tw-text-slate-900 hover:tw-underline">
               Register
             </Link>
           </p>
         </div>
-        
+
+        {/* Or divider */}
+        <div className="tw-flex tw-items-center tw-justify-center tw-space-x-2">
+          <span className="tw-border-b tw-border-gray-400 tw-w-1/5"></span>
+          <span className="tw-text-xs tw-text-gray-500">or</span>
+          <span className="tw-border-b tw-border-gray-400 tw-w-1/5"></span>
+        </div>
+
+        {/* Google Login */}
+        <div>
+          <GoogleLogin
+            onSuccess={async (credentialResponse: CredentialResponse) => {
+              try {
+                const idToken = credentialResponse.credential;
+                if (!idToken) throw new Error('No ID token returned from Google');
+                await loginWithGoogle(idToken);
+                toast.success('Signed up & logged in with Google!');
+                navigate(redirectTo, { replace: true });
+              } catch (err: any) {
+                console.error('Google signup error:', err);
+                toast.error(err.message || 'Google signup failed.');
+              }
+            }}
+            onError={() => {
+              toast.error('Google signup was cancelled or failed.');
+            }}
+            useOneTap={false}
+          />
+        </div>
+
+
       </form>
     </AuthLayout>
   );
